@@ -1,0 +1,103 @@
+<!-- ImportarYmapearRegistros.html -->
+<template>
+    <lightning-card title="Importar y Mapear Registros" icon-name="utility:integration">
+        <div class="slds-m-around_medium">
+            <!-- Sección para seleccionar el objeto -->
+            <template if:true={showFirstComponent}>
+                <div class="slds-m-around_medium">
+                    <lightning-input type="text" label="Buscar Objeto" onchange={handleSearchChange}
+                        value={searchTerm}></lightning-input>
+                    <template if:true={showResults}>
+                        <ul class="slds-listbox slds-listbox_vertical">
+                            <template for:each={filteredObjects} for:item="obj">
+                                <li key={obj.value} role="option" class="slds-listbox__item" onclick={handleObjectSelection}
+                                    data-value={obj.value}>
+                                    <span class="slds-truncate">{obj.label}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+                <!-- Botón para confirmar la selección del objeto --><!-- Botón para confirmar la selección del objeto -->
+                <template if:true={selectedObject}>
+                    <div class="slds-m-around_medium">
+                        <lightning-button label="Confirmar" onclick={confirmarSeleccion} variant="brand"></lightning-button>
+                    </div>
+                </template>
+
+                 <!-- Sección para cargar y mostrar datos CSV -->
+            <template if:true={showUploadSection}>
+                <div class="slds-m-around_medium">
+                    <lightning-input type="file" label="Seleccionar Archivo CSV" accept=".csv" onchange={handleFileChange}></lightning-input>
+                    <div class={importMessageClass}>{importMessage}</div>
+                </div>
+                <!-- Se muestra la tabla con los datos del CSV inmediatamente después de la carga -->
+                <template if:true={hasImportedData}>
+                    <div class="slds-m-around_medium">
+                        <lightning-button label="Mapear Campos" onclick={mostrarSiguienteComponente} class="siguienteButtonClass" variant="neutral"></lightning-button>
+                    </div>
+                    <div class="slds-m-around_medium">
+                        <lightning-datatable
+                            key-field="id"
+                            data={importedData}
+                            columns={columns}
+                            hide-checkbox-column
+                            show-row-number-column>
+                        </lightning-datatable>
+                    </div>
+                </template>
+            </template>
+            </template>
+
+        <!-- Sección para mapeo de campos entre CSV y objeto Salesforce -->
+        <template if:true={showFields}>
+            <div class="slds-m-around_medium">
+                <lightning-button label="Regresar" onclick={mostrarComponenteAnterior} variant="neutral"></lightning-button>
+                <div class="slds-m-top_medium">
+                    <template if:true={showUploadSection}>
+                        <lightning-button label="Actualizar Registros" onclick={updateRecords} class="slds-m-left_x-small"></lightning-button>
+                    </template>
+                    <lightning-button label="Importar Registros" variant="brand" onclick={importRecords}></lightning-button>
+                </div>
+                <h3 class="slds-text-heading_small">Mapeo de Campos: CSV y Objeto Salesforce</h3>
+                <lightning-datatable
+                    key-field="id"
+                    data={combinedFields}
+                    columns={column}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column="true">
+                </lightning-datatable>
+
+            </div>
+        </template>
+
+        <!-- Modal for Field Selection -->
+        <template if:true={isModalOpen}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <!-- Modal/Dialog header -->
+                    <header class="slds-modal__header">
+                        <h2 class="slds-modal__title">Seleccionar Campo de Salesforce</h2>
+                    </header>
+                    <!-- Modal/Dialog body -->
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-combobox
+                            name="fieldSelection"
+                            label="Seleccionar Campo"
+                            value={selectedField}
+                            options={objectFieldOptions}
+                            onchange={handleFieldSelectionChange}>
+                        </lightning-combobox>
+                    </div>
+                    <!-- Modal/Dialog footer -->
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancelar" onclick={closeModal}></lightning-button>
+                        <lightning-button variant="brand" label="Guardar" onclick={saveMapping} class="slds-m-left_small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+        </div>
+    </lightning-card>
+</template>
